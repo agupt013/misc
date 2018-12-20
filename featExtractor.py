@@ -82,7 +82,7 @@ if __name__ == "__main__":
     
     args = parser.parse_args()
 
-    if len(sys.argv) < 2*(len(vars(args))-2) +1 :
+    if len(sys.argv) < 2*(len(vars(args))-3) +1 :
         sys.exit('[Error] Source Code 0: Usage: python {0} -d <path to data directory> -h <output path to store hdf5 file>'.format(sys.argv[0]))
 
     if args.model_path == None:
@@ -95,6 +95,11 @@ if __name__ == "__main__":
     else:
         device = torch.device("cpu")
 
+    if args.batch_size == None:
+        batch_size = 64
+    else:
+        batch_size = args.batch_size
+	
     model = torch.nn.Sequential(*list(model.children())[:-1])
 
     model.to(device)
@@ -102,8 +107,8 @@ if __name__ == "__main__":
     #input(model)
     data_dir = args.data_dir
     hdf5_path = args.hdf5_path
-    TRAIN_DIR = os.path.join(data_dir, 'train')
-    VALID_DIR = os.path.join(data_dir, 'val')
+    #TRAIN_DIR = os.path.join(data_dir, 'train')
+    #VALID_DIR = os.path.join(data_dir, 'val')
 
     data_transforms = transforms.Compose([
         transforms.Resize(256),
@@ -111,9 +116,10 @@ if __name__ == "__main__":
         transforms.ToTensor(),
         transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])])
 
-    image_datasets = ImageFolderWithPaths(TRAIN_DIR,data_transforms)
-                 
-    dataloaders = torch.utils.data.DataLoader(image_datasets, batch_size=args.batch_size,
+    #image_datasets = ImageFolderWithPaths(data_dir,data_transforms)
+    image_datasets = ImageFolderWithPaths(TRAIN_DIR,data_transforms)   
+
+    dataloaders = torch.utils.data.DataLoader(image_datasets, batch_size=batch_size,
                                              shuffle=False, num_workers=4)
       
     dataset_sizes = len(image_datasets)
